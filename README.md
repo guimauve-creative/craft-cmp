@@ -1,6 +1,6 @@
-# Cookie Consent for Craft CMS
+# Craft CMP — Consent Management Platform
 
-A **headless-first** cookie consent / CMP for Craft CMS 5. It stores
+A **headless-first** consent management platform (CMP) for Craft CMS 5. It stores
 proof-of-consent records in your database and exposes a clean **REST + GraphQL
 API** so any decoupled frontend (Nuxt, React, Astro, plain JS) can read the
 banner configuration, save a visitor's decision, and check their stored consent.

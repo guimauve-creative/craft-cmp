@@ -1,8 +1,9 @@
 {
     "name": "guimauve/craft-cmp",
-    "description": "Headless-first cookie consent / CMP for Craft CMS. Stores proof-of-consent records and exposes a REST + GraphQL API for decoupled frontends (Nuxt, React, etc.). Google Consent Mode v2 ready.",
+    "description": "Headless-first consent management platform (CMP) for Craft CMS. Stores proof-of-consent records and exposes a REST + GraphQL API for decoupled frontends (Nuxt, React, etc.), plus a Twig integration for traditional sites. Google Consent Mode v2 ready.",
     "type": "craft-plugin",
     "license": "proprietary",
+    "homepage": "https://guimauvecreative.com",
     "keywords": [
         "craft",
         "cms",
@@ -14,6 +15,14 @@
         "gdpr",
         "headless",
         "consent mode"
+    ],
+    "authors": [
+        {
+            "name": "Guimauve",
+            "homepage": "https://guimauvecreative.com",
+            "email": "info@guimauvecreative.com",
+            "role": "Developer"
+        }
     ],
     "support": {
         "email": "info@guimauvecreative.com",
@@ -35,13 +44,16 @@
         }
     },
     "extra": {
-        "name": "Cookie Consent",
+        "name": "Craft CMP - Consent Management Platform",
         "handle": "cookie-consent",
         "class": "guimauve\\cookieconsent\\CookieConsent",
+        "developer": "Guimauve",
+        "developerUrl": "https://guimauvecreative.com",
         "documentationUrl": "https://github.com/guimauve-creative/craft-cmp/blob/main/README.md",
         "changelogUrl": "https://raw.githubusercontent.com/guimauve-creative/craft-cmp/main/CHANGELOG.md"
     },
     "config": {
+        "sort-packages": true,
         "allow-plugins": {
             "yiisoft/yii2-composer": true,
             "craftcms/plugin-installer": true

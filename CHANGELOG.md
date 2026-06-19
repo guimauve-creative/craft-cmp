@@ -1,6 +1,6 @@
-# Release Notes for Cookie Consent
+# Release Notes for Craft CMP — Consent Management Platform
 
-## 1.0.0 - 2026-06-19
+## 0.1.0 - 2026-06-19
 
 ### Added
 - Initial release.
