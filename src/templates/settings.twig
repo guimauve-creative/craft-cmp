@@ -1,0 +1,149 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set title = "Settings"|t('cookie-consent') %}
+{% set fullPageForm = true %}
+
+{% set crumbs = [
+    { label: plugin.getPluginName(), url: url('cookie-consent') },
+] %}
+
+{% set signalPlaceholder = signalOptions|keys|join(', ') %}
+
+{# Category options for the scripts table's category column #}
+{% set categoryOptions = [] %}
+{% for cat in settings.getCategories() %}
+    {% set categoryOptions = categoryOptions|merge([{ label: cat.label ?: cat.handle, value: cat.handle }]) %}
+{% endfor %}
+
+{% block content %}
+    <input type="hidden" name="action" value="plugins/save-plugin-settings">
+    <input type="hidden" name="pluginHandle" value="cookie-consent">
+    {{ redirectInput('cookie-consent/settings') }}
+
+    {{ forms.textField({
+        first: true,
+        label: "Plugin name"|t('cookie-consent'),
+        instructions: "How the plugin is named in the Control Panel."|t('cookie-consent'),
+        id: 'pluginName',
+        name: 'settings[pluginName]',
+        value: settings.pluginName,
+        required: true,
+    }) }}
+
+    <hr>
+    <h2>{{ "Cookie categories"|t('cookie-consent') }}</h2>
+
+    {{ forms.editableTableField({
+        label: "Categories"|t('cookie-consent'),
+        instructions: "Each category maps to one or more Google Consent Mode v2 signals. `gtagSignals` is a comma-separated list of: #{signalPlaceholder}."|t('cookie-consent'),
+        id: 'categories',
+        name: 'settings[categories]',
+        cols: {
+            handle: { heading: "Handle"|t('cookie-consent'), type: 'singleline', width: '15%' },
+            label: { heading: "Label"|t('cookie-consent'), type: 'singleline', width: '20%' },
+            description: { heading: "Description"|t('cookie-consent'), type: 'multiline' },
+            required: { heading: "Required"|t('cookie-consent'), type: 'lightswitch', width: '10%' },
+            gtagSignals: { heading: "Consent Mode signals"|t('cookie-consent'), type: 'singleline', width: '25%', placeholder: signalPlaceholder },
+        },
+        rows: settings.getCategoriesForTable(),
+        addRowLabel: "Add a category"|t('cookie-consent'),
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
+    }) }}
+
+    <hr>
+    <h2>{{ "Banner copy"|t('cookie-consent') }}</h2>
+
+    {{ forms.textField({ label: "Banner title"|t('cookie-consent'), id: 'bannerTitle', name: 'settings[bannerTitle]', value: settings.bannerTitle }) }}
+    {{ forms.textareaField({ label: "Banner body"|t('cookie-consent'), instructions: "May contain HTML."|t('cookie-consent'), id: 'bannerBody', name: 'settings[bannerBody]', value: settings.bannerBody }) }}
+    {{ forms.textField({ label: "“Accept all” label"|t('cookie-consent'), id: 'acceptAllLabel', name: 'settings[acceptAllLabel]', value: settings.acceptAllLabel }) }}
+    {{ forms.textField({ label: "“Reject all” label"|t('cookie-consent'), id: 'rejectAllLabel', name: 'settings[rejectAllLabel]', value: settings.rejectAllLabel }) }}
+    {{ forms.textField({ label: "“Save preferences” label"|t('cookie-consent'), id: 'savePrefsLabel', name: 'settings[savePrefsLabel]', value: settings.savePrefsLabel }) }}
+    {{ forms.textField({ label: "“Manage preferences” label"|t('cookie-consent'), id: 'managePrefsLabel', name: 'settings[managePrefsLabel]', value: settings.managePrefsLabel }) }}
+
+    <hr>
+    <h2>{{ "Versions"|t('cookie-consent') }}</h2>
+
+    {{ forms.textField({
+        label: "Policy version"|t('cookie-consent'),
+        instructions: "Bump this to force every visitor to re-consent."|t('cookie-consent'),
+        id: 'policyVersion', name: 'settings[policyVersion]', value: settings.policyVersion, required: true, size: 10,
+    }) }}
+    {{ forms.textField({
+        label: "Consent version"|t('cookie-consent'),
+        instructions: "Version of the banner/category configuration."|t('cookie-consent'),
+        id: 'consentVersion', name: 'settings[consentVersion]', value: settings.consentVersion, required: true, size: 10,
+    }) }}
+
+    <hr>
+    <h2>{{ "Google Consent Mode v2"|t('cookie-consent') }}</h2>
+
+    {{ forms.lightswitchField({
+        label: "Enable Google Consent Mode"|t('cookie-consent'),
+        instructions: "When on, the per-category “Consent Mode signals” are sent to Google’s tag (gtag) and the measurement ID below can load GA4. Turn off if you don’t use Google and rely only on the tags/scripts below."|t('cookie-consent'),
+        id: 'consentModeEnabled', name: 'settings[consentModeEnabled]', on: settings.consentModeEnabled,
+    }) }}
+    {{ forms.autosuggestField({
+        label: "GA4 measurement ID"|t('cookie-consent'),
+        instructions: "Optional. The frontend can read this to self-configure gtag (e.g. G-XXXXXXX). Supports environment variables."|t('cookie-consent'),
+        id: 'gaMeasurementId', name: 'settings[gaMeasurementId]', value: settings.gaMeasurementId, suggestEnvVars: true,
+    }) }}
+
+    <hr>
+    <h2>{{ "Tags & scripts"|t('cookie-consent') }}</h2>
+    <p class="light">{{ "Provider-agnostic tags (Meta Pixel, Matomo, Hotjar, LinkedIn, …) that load only when their category is granted. Use an external URL, inline code, or both. These run third-party code on your front-end — only add sources you trust."|t('cookie-consent') }}</p>
+
+    {{ forms.editableTableField({
+        label: "Scripts"|t('cookie-consent'),
+        id: 'scripts',
+        name: 'settings[scripts]',
+        cols: {
+            name: { heading: "Name"|t('cookie-consent'), type: 'singleline', width: '20%' },
+            category: { heading: "Category"|t('cookie-consent'), type: 'select', options: categoryOptions, width: '20%' },
+            src: { heading: "External URL"|t('cookie-consent'), type: 'singleline', width: '30%', placeholder: 'https://…' },
+            code: { heading: "Inline code"|t('cookie-consent'), type: 'multiline' },
+        },
+        rows: settings.getScriptsForTable(),
+        addRowLabel: "Add a tag"|t('cookie-consent'),
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
+    }) }}
+
+    <hr>
+    <h2>{{ "Cookie & storage"|t('cookie-consent') }}</h2>
+
+    {{ forms.textField({ label: "Cookie name"|t('cookie-consent'), id: 'cookieName', name: 'settings[cookieName]', value: settings.cookieName, required: true, size: 20 }) }}
+    {{ forms.textField({ label: "Cookie lifetime (days)"|t('cookie-consent'), id: 'cookieLifetimeDays', name: 'settings[cookieLifetimeDays]', value: settings.cookieLifetimeDays, type: 'number', size: 6 }) }}
+    {{ forms.textField({
+        label: "Record retention (days)"|t('cookie-consent'),
+        instructions: "Delete consent records older than this. 0 = keep forever."|t('cookie-consent'),
+        id: 'consentRetentionDays', name: 'settings[consentRetentionDays]', value: settings.consentRetentionDays, type: 'number', size: 6,
+    }) }}
+    {{ forms.lightswitchField({
+        label: "Hash stored IP addresses"|t('cookie-consent'),
+        instructions: "Recommended. Stores a SHA-256 hash instead of the raw IP."|t('cookie-consent'),
+        id: 'hashIp', name: 'settings[hashIp]', on: settings.hashIp,
+    }) }}
+
+    <hr>
+    <h2>{{ "Headless API security"|t('cookie-consent') }}</h2>
+
+    {{ forms.editableTableField({
+        label: "Allowed origins (CORS)"|t('cookie-consent'),
+        instructions: "Origins permitted to call the headless API from the browser, e.g. https://www.example.com. Leave empty for same-origin / server-to-server only."|t('cookie-consent'),
+        id: 'allowedOrigins',
+        name: 'settings[allowedOrigins]',
+        cols: { origin: { heading: "Origin"|t('cookie-consent'), type: 'singleline' } },
+        rows: settings.allowedOrigins,
+        addRowLabel: "Add an origin"|t('cookie-consent'),
+        static: false,
+    }) }}
+    {{ forms.autosuggestField({
+        label: "Shared secret"|t('cookie-consent'),
+        instructions: "Optional. When set, POST /cookie-consent/save must send it as the `X-Consent-Secret` header. Supports environment variables."|t('cookie-consent'),
+        id: 'sharedSecret', name: 'settings[sharedSecret]', value: settings.sharedSecret, suggestEnvVars: true,
+    }) }}
+{% endblock %}

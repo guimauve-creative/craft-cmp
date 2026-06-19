@@ -1,0 +1,12 @@
+# Private notes — never commit (monetization plan, internal docs, scratch)
+/.notes
+
+# Dependencies
+/vendor
+composer.lock
+
+# OS / editor
+.DS_Store
+.idea
+.vscode
+*.log

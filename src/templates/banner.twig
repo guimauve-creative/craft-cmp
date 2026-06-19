@@ -1,0 +1,63 @@
+{#
+    Default cookie consent banner (Twig).
+
+    Override it by passing a project template path:
+        {{ craft.cookieConsent.banner('_partials/cookie-banner') }}
+    …and copy this file's markup as a starting point. The only contract the
+    bundled JS needs is the data-cc-* attributes.
+
+    Available variables: config, current (handle => bool), needsConsent (bool).
+#}
+{% set banner = config.banner %}
+
+<div data-cc-banner {% if not needsConsent %}hidden{% endif %} class="cc-banner" role="dialog" aria-label="{{ banner.title }}">
+    <div class="cc-banner__text">
+        <strong>{{ banner.title }}</strong>
+        <div>{{ banner.body|raw }}</div>
+    </div>
+    <div class="cc-banner__actions">
+        <button type="button" data-cc-action="manage">{{ banner.managePrefsLabel }}</button>
+        <button type="button" data-cc-action="reject-all">{{ banner.rejectAllLabel }}</button>
+        <button type="button" data-cc-action="accept-all" class="cc-btn--primary">{{ banner.acceptAllLabel }}</button>
+    </div>
+</div>
+
+<div data-cc-modal hidden class="cc-modal" role="dialog" aria-modal="true" aria-label="{{ banner.managePrefsLabel }}">
+    <div class="cc-modal__box">
+        <strong>{{ banner.managePrefsLabel }}</strong>
+        <ul class="cc-modal__list">
+            {% for cat in config.categories %}
+                <li class="cc-modal__row">
+                    <div>
+                        <p class="cc-modal__label">{{ cat.label }}</p>
+                        <p class="cc-modal__desc">{{ cat.description }}</p>
+                    </div>
+                    <input
+                        type="checkbox"
+                        data-cc-category="{{ cat.handle }}"
+                        {{ (cat.required or current[cat.handle] ?? false) ? 'checked' : '' }}
+                        {{ cat.required ? 'disabled' : '' }}
+                    >
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="cc-banner__actions">
+            <button type="button" data-cc-action="close">{{ 'Cancel'|t('cookie-consent') }}</button>
+            <button type="button" data-cc-action="save" class="cc-btn--primary">{{ banner.savePrefsLabel }}</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cc-banner{position:fixed;inset-inline:0;bottom:0;z-index:9999;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;max-width:64rem;margin:1rem auto;padding:1.25rem;background:#fff;border-radius:.5rem;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+    .cc-banner__text{flex:1 1 18rem;font-size:.875rem;line-height:1.4}
+    .cc-banner__actions{display:flex;flex-wrap:wrap;gap:.5rem}
+    .cc-banner button,.cc-modal button{cursor:pointer;padding:.5rem 1rem;border:1px solid #1E538C;border-radius:.375rem;background:#fff;color:#1E538C;font-size:.875rem}
+    .cc-btn--primary{background:#1A5EA9!important;color:#fff!important;border-color:#1A5EA9!important}
+    .cc-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.5)}
+    .cc-modal__box{width:100%;max-width:32rem;padding:1.5rem;background:#fff;border-radius:.5rem}
+    .cc-modal__list{list-style:none;margin:1rem 0;padding:0}
+    .cc-modal__row{display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;padding:.75rem 0;border-top:1px solid #eee}
+    .cc-modal__label{font-weight:600;margin:0}
+    .cc-modal__desc{font-size:.8125rem;color:#555;margin:.15rem 0 0}
+</style>
