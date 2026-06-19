@@ -22,8 +22,8 @@ Twig integration. Either way, the plugin owns the data, config and consent recor
 - **Consent Mode v2 + any provider** — map categories to the seven Google consent
   signals, and/or gate per-category scripts (Meta, Matomo, Hotjar, …) that load
   only on consent.
-- **Framework-agnostic** — ship the included vanilla-JS core to any frontend; a
-  Vue and a React example are below.
+- **Framework-agnostic** — a dependency-free vanilla-JS core works with any
+  frontend; ready-to-copy Vue and React examples in [`examples/`](examples/).
 - **Self-contained & configurable** — categories, copy, versions, cookie
   name/lifetime, retention, CORS and a shared secret, all in plugin settings.
 
@@ -54,9 +54,9 @@ Then open **Settings → Cookie Consent** and define your categories.
    open-in-new-tab toggle.
 4. **Policy version** — bump this string whenever your cookie policy changes;
    every visitor will be re-prompted automatically.
-4. **GA4 measurement ID** — optional. If set, the frontend core can load
+5. **GA4 measurement ID** — optional. If set, the frontend core can load
    `gtag.js` for you. Supports environment variables (`$GA_MEASUREMENT_ID`).
-5. **Headless API security** — add your frontend origin(s) to the CORS
+6. **Headless API security** — add your frontend origin(s) to the CORS
    allow-list, and optionally set a shared secret for write requests.
 
 A sensible starter set of categories:
@@ -265,357 +265,42 @@ Available methods: `config(locale)`, `has(handle, visitorId?)`,
 
 ---
 
-## Frontend: framework-agnostic core
+## Frontend integration (headless)
 
-Drop this `CookieConsentManager` into any project. It has **no framework
-imports**. It fetches config, persists the decision in a first-party cookie,
-drives Consent Mode v2, and POSTs the audit record.
+Craft CMP ships no frontend assets for headless use — a small, dependency-free
+core does the work and your UI just renders. Copy-paste starting points live in
+[`examples/`](examples/) (these are featured here but **not** part of the
+installed Composer package):
 
-```js
-// cookie-consent-core.js
-const DEFAULT_DENIED = {
-  ad_storage: 'denied', analytics_storage: 'denied', ad_user_data: 'denied',
-  ad_personalization: 'denied', functionality_storage: 'denied',
-  personalization_storage: 'denied', security_storage: 'granted',
-};
-
-function uuid() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0; const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
-const browserStorage = {
-  get(name) {
-    if (typeof document === 'undefined') return null;
-    const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-    return m ? decodeURIComponent(m[1]) : null;
-  },
-  set(name, value, maxAgeDays) {
-    if (typeof document === 'undefined') return;
-    document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAgeDays * 86400}; Path=/; SameSite=Lax`;
-  },
-};
-
-export class CookieConsentManager {
-  constructor(opts = {}) {
-    const base = (opts.apiBase || '').replace(/\/$/, '');
-    this.endpoints = {
-      config: `${base}/cookie-consent/config`,
-      save: `${base}/cookie-consent/save`,
-      status: `${base}/cookie-consent/status`,
-      ...(opts.endpoints || {}),
-    };
-    this.config = opts.config || null;
-    this.storage = opts.storage || browserStorage;
-    this.fetchImpl = opts.fetchImpl || (typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null);
-    this.sharedSecret = opts.sharedSecret || null;
-    this.decision = this._readCookie();
-  }
-
-  async loadConfig() {
-    if (this.config) return this.config;
-    const res = await this.fetchImpl(this.endpoints.config, { headers: { Accept: 'application/json' } });
-    this.config = await res.json();
-    return this.config;
-  }
-
-  get cookieName() { return this.config?.cookie?.name || 'cc_consent'; }
-  get cookieLifetimeDays() { return this.config?.cookie?.lifetimeDays || 180; }
-  get policyVersion() { return this.config?.policyVersion || '1'; }
-
-  needsConsent() { return !this.decision || this.decision.v !== this.policyVersion; }
-
-  currentCategories() { return this.decision?.c || this.defaultCategories(); }
-  defaultCategories() {
-    const map = {};
-    (this.config?.categories || []).forEach((c) => { map[c.handle] = !!c.required; });
-    return map;
-  }
-
-  visitorId() {
-    const key = `${this.cookieName}_vid`;
-    let id = this.storage.get(key);
-    if (!id) { id = uuid(); this.storage.set(key, id, 395); }
-    return id;
-  }
-
-  buildConsentUpdate(categories) {
-    const update = { ...DEFAULT_DENIED };
-    (this.config?.categories || []).forEach((cat) => {
-      const granted = !!categories[cat.handle];
-      (cat.gtagSignals || []).forEach((sig) => {
-        if (sig === 'security_storage') return;
-        update[sig] = granted ? 'granted' : 'denied';
-      });
-    });
-    return update;
-  }
-
-  bootstrapConsentMode(gtagId = this.config?.gaMeasurementId) {
-    if (typeof window === 'undefined') return;
-    window.dataLayer = window.dataLayer || [];
-    if (!window.gtag) window.gtag = function () { window.dataLayer.push(arguments); };
-    window.gtag('consent', 'default', { ...DEFAULT_DENIED, wait_for_update: 500 });
-    window.gtag('set', 'url_passthrough', true);
-    window.gtag('set', 'ads_data_redaction', true);
-    this.applyStored();
-    if (gtagId) {
-      const s = document.createElement('script');
-      s.async = true; s.src = `https://www.googletagmanager.com/gtag/js?id=${gtagId}`;
-      document.head.appendChild(s);
-      window.gtag('js', new Date());
-      window.gtag('config', gtagId);
-    }
-  }
-
-  applyStored() {
-    if (!this.decision?.c || typeof window === 'undefined' || !window.gtag) return;
-    window.gtag('consent', 'update', this.buildConsentUpdate(this.decision.c));
-  }
-
-  acceptAll() {
-    const map = {}; (this.config?.categories || []).forEach((c) => { map[c.handle] = true; });
-    return this.save(map, 'accept_all');
-  }
-  rejectAll() {
-    const map = {}; (this.config?.categories || []).forEach((c) => { map[c.handle] = !!c.required; });
-    return this.save(map, 'reject_all');
-  }
-  savePreferences(categories) { return this.save(categories, 'custom'); }
-
-  async save(categories, action = 'custom') {
-    (this.config?.categories || []).forEach((c) => { if (c.required) categories[c.handle] = true; });
-    this.decision = { v: this.policyVersion, c: categories, a: action, t: Date.now() };
-    this._writeCookie(this.decision);
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('consent', 'update', this.buildConsentUpdate(categories));
-    }
-    await this._post(categories, action);
-    return this.decision;
-  }
-
-  async _post(categories, action) {
-    if (!this.fetchImpl) return;
-    const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
-    if (this.sharedSecret) headers['X-Consent-Secret'] = this.sharedSecret;
-    try {
-      await this.fetchImpl(this.endpoints.save, {
-        method: 'POST', headers, credentials: 'omit',
-        body: JSON.stringify({ visitorId: this.visitorId(), categories, action }),
-      });
-    } catch (e) { /* never block the UI on the audit write */ }
-  }
-
-  _readCookie() {
-    const raw = this.storage.get(this.cookieName);
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
-  }
-  _writeCookie(d) { this.storage.set(this.cookieName, JSON.stringify(d), this.cookieLifetimeDays); }
-}
-```
-
-> The snippet above is abridged for readability. The canonical core ships in the
-> repo and additionally **injects per-category provider scripts** (`config.scripts`)
-> via an `applyScripts()` method called from `bootstrapConsentMode`, `applyStored`
-> and `save`, and **skips the gtag wiring when `config.consentMode === false`**.
-> Pass `{ injectScripts: false }` to the constructor if your app prefers to own
-> DOM injection of those scripts. Use that file as-is.
-
-### How you use it (any framework)
+- **[`examples/javascript/cookie-consent-core.js`](examples/javascript/cookie-consent-core.js)**
+  — the framework-agnostic `CookieConsentManager`: fetches config, persists the
+  cookie, drives Google Consent Mode v2, injects per-category provider scripts,
+  and POSTs the audit record. **Start here.**
+- **[Vue banner](examples/vue/CookieConsentBanner.vue)** and
+  **[React hook + banner](examples/react/CookieConsentBanner.jsx)** — the same UI
+  on top of the core. Svelte / plain JS work identically.
 
 ```js
+import { CookieConsentManager } from './cookie-consent-core.js';
+
 const cc = new CookieConsentManager({ apiBase: 'https://cms.example.com' });
 await cc.loadConfig();
-cc.bootstrapConsentMode();          // default-denied → load GA + inject granted scripts
-if (cc.needsConsent()) showBanner(); // render your own UI
-// on click:
-cc.acceptAll();                      // or cc.rejectAll() / cc.savePreferences({analytics:true})
+cc.bootstrapConsentMode();            // default-denied → loads GA + granted scripts
+if (cc.needsConsent()) showBanner();  // render your own UI
+cc.acceptAll();                       // or rejectAll() / savePreferences({ analytics: true })
 ```
 
----
+Because the core has no framework dependencies, every frontend hits the **exact
+same** REST/GraphQL contract — no plugin changes to support a new framework.
 
-## Demo: Vue component
+### SSR (Nuxt / Next)
 
-A self-contained banner + preferences modal. The component only renders and
-calls the core — swap the framework, keep the logic.
-
-```vue
-<script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
-import { CookieConsentManager } from './cookie-consent-core.js';
-
-const props = defineProps({ apiBase: { type: String, default: '' } });
-
-const cc = new CookieConsentManager({ apiBase: props.apiBase });
-const config = ref(null);
-const open = ref(false);
-const showPrefs = ref(false);
-const selection = reactive({});
-
-const categories = computed(() => config.value?.categories ?? []);
-
-onMounted(async () => {
-  config.value = await cc.loadConfig();
-  cc.bootstrapConsentMode();                 // Consent Mode v2: default-denied → GA
-  Object.assign(selection, cc.currentCategories());
-  open.value = cc.needsConsent();
-});
-
-function acceptAll() { cc.acceptAll(); open.value = showPrefs.value = false; }
-function rejectAll() { cc.rejectAll(); open.value = showPrefs.value = false; }
-function savePrefs() { cc.savePreferences({ ...selection }); open.value = showPrefs.value = false; }
-function manage() { Object.assign(selection, cc.currentCategories()); showPrefs.value = true; }
-
-// expose manage() so a footer link can re-open preferences:
-defineExpose({ manage });
-</script>
-
-<template>
-  <section v-if="open && config" class="cc-banner" role="dialog" :aria-label="config.banner.title">
-    <div>
-      <h2>{{ config.banner.title }}</h2>
-      <div v-html="config.banner.body" />
-    </div>
-    <div class="cc-actions">
-      <button @click="manage">{{ config.banner.managePrefsLabel }}</button>
-      <button @click="rejectAll">{{ config.banner.rejectAllLabel }}</button>
-      <button @click="acceptAll">{{ config.banner.acceptAllLabel }}</button>
-    </div>
-    <ul v-if="config.links?.length" class="cc-links">
-      <li v-for="(link, i) in config.links" :key="i">
-        <a :href="link.url" :target="link.newTab ? '_blank' : null" :rel="link.newTab ? 'noopener noreferrer' : null">{{ link.label }}</a>
-      </li>
-    </ul>
-  </section>
-
-  <div v-if="showPrefs" class="cc-modal" role="dialog" aria-modal="true">
-    <div class="cc-modal__box">
-      <h2>{{ config.banner.managePrefsLabel }}</h2>
-      <label v-for="cat in categories" :key="cat.handle" class="cc-row">
-        <span>
-          <strong>{{ cat.label }}</strong>
-          <small>{{ cat.description }}</small>
-        </span>
-        <input type="checkbox" :disabled="cat.required"
-               :checked="cat.required ? true : !!selection[cat.handle]"
-               @change="selection[cat.handle] = $event.target.checked">
-      </label>
-      <div class="cc-actions">
-        <button @click="showPrefs = false">Cancel</button>
-        <button @click="savePrefs">{{ config.banner.savePrefsLabel }}</button>
-      </div>
-    </div>
-  </div>
-</template>
-```
-
-### Nuxt 3 (SSR) notes
-
-For Nuxt, wrap the banner in `<ClientOnly>` (consent is browser state), read the
-config through GraphQL (`cookieConsentConfig`) to avoid CORS, and POST consent
-**server-to-server** through a Nitro route so Craft sees the real client IP:
-
-```js
-// server/api/consent.post.js
-export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  return await $fetch(`${process.env.CMS_INTERNAL_URL}/cookie-consent/save`, {
-    method: 'POST',
-    headers: {
-      'X-Forwarded-For': getRequestHeader(event, 'x-forwarded-for') || getRequestIP(event) || '',
-      ...(process.env.CONSENT_SHARED_SECRET ? { 'X-Consent-Secret': process.env.CONSENT_SHARED_SECRET } : {}),
-    },
-    body,
-  });
-});
-```
-
-Then construct the manager with `new CookieConsentManager({ config, endpoints: { save: '/api/consent' } })`.
-
----
-
-## Adapting to React
-
-Same core, a thin hook + component. Nothing about the core changes.
-
-```jsx
-// useCookieConsent.js
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { CookieConsentManager } from './cookie-consent-core.js';
-
-export function useCookieConsent(apiBase = '') {
-  const cc = useRef(null);
-  const [config, setConfig] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [selection, setSelection] = useState({});
-
-  useEffect(() => {
-    cc.current = new CookieConsentManager({ apiBase });
-    (async () => {
-      const cfg = await cc.current.loadConfig();
-      cc.current.bootstrapConsentMode();              // default-denied → GA
-      setConfig(cfg);
-      setSelection(cc.current.currentCategories());
-      setOpen(cc.current.needsConsent());
-    })();
-  }, [apiBase]);
-
-  const acceptAll = useCallback(() => { cc.current.acceptAll(); setOpen(false); }, []);
-  const rejectAll = useCallback(() => { cc.current.rejectAll(); setOpen(false); }, []);
-  const savePrefs = useCallback((sel) => { cc.current.savePreferences(sel); setOpen(false); }, []);
-  const manage = useCallback(() => { setSelection(cc.current.currentCategories()); setOpen(true); }, []);
-
-  return { config, open, selection, setSelection, acceptAll, rejectAll, savePrefs, manage };
-}
-```
-
-```jsx
-// CookieConsentBanner.jsx
-import { useCookieConsent } from './useCookieConsent.js';
-
-export function CookieConsentBanner({ apiBase }) {
-  const { config, open, selection, setSelection, acceptAll, rejectAll, savePrefs } = useCookieConsent(apiBase);
-  if (!open || !config) return null;
-
-  return (
-    <section className="cc-banner" role="dialog" aria-label={config.banner.title}>
-      <div>
-        <h2>{config.banner.title}</h2>
-        <div dangerouslySetInnerHTML={{ __html: config.banner.body }} />
-      </div>
-      <div className="cc-actions">
-        <button onClick={rejectAll}>{config.banner.rejectAllLabel}</button>
-        <button onClick={acceptAll}>{config.banner.acceptAllLabel}</button>
-        {config.categories.filter((c) => !c.required).map((c) => (
-          <label key={c.handle}>
-            <input type="checkbox" checked={!!selection[c.handle]}
-              onChange={(e) => setSelection({ ...selection, [c.handle]: e.target.checked })} />
-            {c.label}
-          </label>
-        ))}
-        <button onClick={() => savePrefs(selection)}>{config.banner.savePrefsLabel}</button>
-      </div>
-      {config.links?.length > 0 && (
-        <ul className="cc-links">
-          {config.links.map((link, i) => (
-            <li key={i}>
-              <a href={link.url} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noopener noreferrer' : undefined}>{link.label}</a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-```
-
-Because the core has no framework dependencies, the React, Vue, Svelte and plain
-JS integrations all hit the **exact same** REST/GraphQL contract — no plugin
-changes required to support a new frontend.
+Wrap the banner in a client-only boundary (consent is browser state), read
+config via GraphQL (`cookieConsentConfig`) to avoid CORS, and POST consent
+**server-to-server** so Craft logs a trustworthy IP — construct the manager with
+`new CookieConsentManager({ config, endpoints: { save: '/api/consent' } })` and
+proxy `/api/consent` to `/cookie-consent/save`. See the SSR notes in
+[`examples/README.md`](examples/README.md).
 
 ---
 

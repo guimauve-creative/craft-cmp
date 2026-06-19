@@ -1,0 +1,8 @@
+# Keep these in the Git repo (GitHub) but strip them from the distributed
+# Composer package (the dist archive buyers install).
+/.gitattributes export-ignore
+/.gitignore    export-ignore
+/.notes        export-ignore
+/examples      export-ignore
+/.github       export-ignore
+/tests         export-ignore
