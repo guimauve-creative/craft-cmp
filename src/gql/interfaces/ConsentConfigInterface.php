@@ -4,6 +4,7 @@ namespace guimauve\cookieconsent\gql\interfaces;
 
 use craft\gql\GqlEntityRegistry;
 use guimauve\cookieconsent\gql\types\ConsentCategoryType;
+use guimauve\cookieconsent\gql\types\ConsentLinkType;
 use guimauve\cookieconsent\gql\types\ConsentScriptType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -41,6 +42,7 @@ class ConsentConfigInterface
                 'savePrefsLabel' => ['type' => Type::string()],
                 'managePrefsLabel' => ['type' => Type::string()],
                 'categories' => ['type' => Type::listOf(ConsentCategoryType::getType())],
+                'links' => ['type' => Type::listOf(ConsentLinkType::getType())],
                 'scripts' => ['type' => Type::listOf(ConsentScriptType::getType())],
             ],
         ]));

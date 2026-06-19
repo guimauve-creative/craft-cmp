@@ -52,6 +52,8 @@ class Config extends Component
                     'gtagSignals' => $consentMode ? $cat['gtagSignals'] : [],
                 ];
             }, $settings->getCategories()),
+            // Small links shown at the bottom of the banner (resolved URLs).
+            'links' => $settings->getLinks($locale),
             // Provider-agnostic tags, loaded by the frontend when their category is granted.
             'scripts' => array_map(static function(array $script) {
                 return [

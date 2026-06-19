@@ -49,7 +49,11 @@ Then open **Settings → Cookie Consent** and define your categories.
    signals the category maps to (see the table below).
 2. **Banner copy** — title, body (HTML allowed) and button labels. These are
    translatable via Craft's static translations / `site` category.
-3. **Policy version** — bump this string whenever your cookie policy changes;
+3. **Banner links** — small links shown at the bottom of the banner (e.g.
+   Privacy policy). Each link has a label and points to an **entry** (resolved to
+   its URL for the requested locale) or a manual **URL**, with an optional
+   open-in-new-tab toggle.
+4. **Policy version** — bump this string whenever your cookie policy changes;
    every visitor will be re-prompted automatically.
 4. **GA4 measurement ID** — optional. If set, the frontend core can load
    `gtag.js` for you. Supports environment variables (`$GA_MEASUREMENT_ID`).
@@ -85,11 +89,17 @@ Returns the banner config and category/signal mapping.
     { "handle": "necessary", "label": "Strictly necessary", "description": "…", "required": true, "gtagSignals": ["security_storage"] },
     { "handle": "analytics", "label": "Analytics", "description": "…", "required": false, "gtagSignals": ["analytics_storage"] }
   ],
+  "links": [
+    { "label": "Privacy policy", "url": "https://www.example.com/privacy", "newTab": false }
+  ],
   "scripts": [
     { "name": "Meta Pixel", "category": "marketing", "src": "https://connect.facebook.net/en_US/fbevents.js", "code": "fbq('init','123');" }
   ]
 }
 ```
+
+`links` are resolved server-side (an entry's URL for the requested locale, or a
+manual URL) and are meant to render as small links at the bottom of the banner.
 
 ### `POST /cookie-consent/save`
 
@@ -129,6 +139,7 @@ query ($locale: String) {
     savePrefsLabel
     managePrefsLabel
     categories { handle label description required gtagSignals }
+    links { label url newTab }
     scripts { name category src code }
   }
 }
@@ -476,6 +487,11 @@ defineExpose({ manage });
       <button @click="rejectAll">{{ config.banner.rejectAllLabel }}</button>
       <button @click="acceptAll">{{ config.banner.acceptAllLabel }}</button>
     </div>
+    <ul v-if="config.links?.length" class="cc-links">
+      <li v-for="(link, i) in config.links" :key="i">
+        <a :href="link.url" :target="link.newTab ? '_blank' : null" :rel="link.newTab ? 'noopener noreferrer' : null">{{ link.label }}</a>
+      </li>
+    </ul>
   </section>
 
   <div v-if="showPrefs" class="cc-modal" role="dialog" aria-modal="true">
@@ -585,6 +601,15 @@ export function CookieConsentBanner({ apiBase }) {
         ))}
         <button onClick={() => savePrefs(selection)}>{config.banner.savePrefsLabel}</button>
       </div>
+      {config.links?.length > 0 && (
+        <ul className="cc-links">
+          {config.links.map((link, i) => (
+            <li key={i}>
+              <a href={link.url} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noopener noreferrer' : undefined}>{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

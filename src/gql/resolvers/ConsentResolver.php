@@ -30,6 +30,7 @@ class ConsentResolver
             'savePrefsLabel' => $config['banner']['savePrefsLabel'],
             'managePrefsLabel' => $config['banner']['managePrefsLabel'],
             'categories' => $config['categories'],
+            'links' => $config['links'],
             'scripts' => $config['scripts'],
         ];
     }

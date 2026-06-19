@@ -20,6 +20,16 @@
         <button type="button" data-cc-action="reject-all">{{ banner.rejectAllLabel }}</button>
         <button type="button" data-cc-action="accept-all" class="cc-btn--primary">{{ banner.acceptAllLabel }}</button>
     </div>
+
+    {% if config.links is not empty %}
+        <ul class="cc-banner__links">
+            {% for link in config.links %}
+                <li>
+                    <a href="{{ link.url }}"{% if link.newTab %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ link.label }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>
 
 <div data-cc-modal hidden class="cc-modal" role="dialog" aria-modal="true" aria-label="{{ banner.managePrefsLabel }}">
@@ -52,6 +62,9 @@
     .cc-banner{position:fixed;inset-inline:0;bottom:0;z-index:9999;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;max-width:64rem;margin:1rem auto;padding:1.25rem;background:#fff;border-radius:.5rem;box-shadow:0 10px 40px rgba(0,0,0,.2)}
     .cc-banner__text{flex:1 1 18rem;font-size:.875rem;line-height:1.4}
     .cc-banner__actions{display:flex;flex-wrap:wrap;gap:.5rem}
+    .cc-banner__links{flex-basis:100%;list-style:none;margin:.25rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.75rem}
+    .cc-banner__links a{font-size:.75rem;color:#1E538C;text-decoration:underline;opacity:.85}
+    .cc-banner__links a:hover{opacity:1}
     .cc-banner button,.cc-modal button{cursor:pointer;padding:.5rem 1rem;border:1px solid #1E538C;border-radius:.375rem;background:#fff;color:#1E538C;font-size:.875rem}
     .cc-btn--primary{background:#1A5EA9!important;color:#fff!important;border-color:#1A5EA9!important}
     .cc-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.5)}

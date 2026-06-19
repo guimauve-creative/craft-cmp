@@ -9,6 +9,7 @@
 ] %}
 
 {% set signalPlaceholder = signalOptions|keys|join(', ') %}
+{% set entryOptions = entryOptions ?? [] %}
 
 {# Category options for the scripts table's category column #}
 {% set categoryOptions = [] %}
@@ -62,6 +63,28 @@
     {{ forms.textField({ label: "“Reject all” label"|t('cookie-consent'), id: 'rejectAllLabel', name: 'settings[rejectAllLabel]', value: settings.rejectAllLabel }) }}
     {{ forms.textField({ label: "“Save preferences” label"|t('cookie-consent'), id: 'savePrefsLabel', name: 'settings[savePrefsLabel]', value: settings.savePrefsLabel }) }}
     {{ forms.textField({ label: "“Manage preferences” label"|t('cookie-consent'), id: 'managePrefsLabel', name: 'settings[managePrefsLabel]', value: settings.managePrefsLabel }) }}
+
+    <hr>
+    <h2>{{ "Banner links"|t('cookie-consent') }}</h2>
+    <p class="light">{{ "Small links shown at the bottom of the banner (e.g. Privacy policy, Cookie policy). Pick an on-site entry, or enter a URL. If both are set, the entry wins."|t('cookie-consent') }}</p>
+
+    {{ forms.editableTableField({
+        label: "Links"|t('cookie-consent'),
+        id: 'links',
+        name: 'settings[links]',
+        cols: {
+            label: { heading: "Label"|t('cookie-consent'), type: 'singleline', width: '25%' },
+            entry: { heading: "Entry"|t('cookie-consent'), type: 'select', options: entryOptions, width: '30%' },
+            url: { heading: "URL"|t('cookie-consent'), type: 'singleline', width: '30%', placeholder: 'https://…' },
+            newTab: { heading: "New tab"|t('cookie-consent'), type: 'lightswitch', width: '15%' },
+        },
+        rows: settings.links,
+        addRowLabel: "Add a link"|t('cookie-consent'),
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
+        static: false,
+    }) }}
 
     <hr>
     <h2>{{ "Versions"|t('cookie-consent') }}</h2>
@@ -136,9 +159,12 @@
         instructions: "Origins permitted to call the headless API from the browser, e.g. https://www.example.com. Leave empty for same-origin / server-to-server only."|t('cookie-consent'),
         id: 'allowedOrigins',
         name: 'settings[allowedOrigins]',
-        cols: { origin: { heading: "Origin"|t('cookie-consent'), type: 'singleline' } },
+        cols: { origin: { heading: "Origin"|t('cookie-consent'), type: 'singleline', placeholder: 'https://www.example.com' } },
         rows: settings.allowedOrigins,
         addRowLabel: "Add an origin"|t('cookie-consent'),
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
         static: false,
     }) }}
     {{ forms.autosuggestField({

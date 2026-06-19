@@ -11,6 +11,7 @@
 - Four standard categories (necessary, preferences, analytics, marketing) pre-filled with their Google Consent Mode v2 signals; fully editable/deletable.
 - Provider-agnostic per-category tags/scripts (external URL and/or inline) that load only when their category is granted — works with any vendor (Meta, Matomo, Hotjar, …). Injected by both the headless JS core and the Twig banner.
 - Google Consent Mode integration is now toggleable (`consentModeEnabled`); when off, signals and the GA measurement ID are suppressed.
+- Banner links repeater: add labelled links that point to an entry (URL resolved per locale) or a manual URL, with an open-in-new-tab toggle. Rendered as small links at the bottom of the banner (Twig + Vue/React snippets) and exposed via REST/GraphQL config.
 - CP settings: cookie categories with Google Consent Mode v2 signal mapping, banner copy, policy/consent versions, cookie name/lifetime, record retention, CORS allow-list and optional shared secret.
 - `cookie-consent/records/gc` console command for retention-based garbage collection.
 - Lite and Pro editions.

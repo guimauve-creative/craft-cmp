@@ -5,6 +5,7 @@ namespace guimauve\cookieconsent\models;
 use Craft;
 use craft\base\Model;
 use craft\behaviors\EnvAttributeParserBehavior;
+use craft\elements\Entry;
 
 /**
  * Cookie Consent settings model.
@@ -72,6 +73,14 @@ class Settings extends Model
     public string $rejectAllLabel = 'Reject all';
     public string $savePrefsLabel = 'Save preferences';
     public string $managePrefsLabel = 'Manage preferences';
+
+    /**
+     * @var array Small links shown at the bottom of the banner (privacy policy,
+     *   cookie policy, …). Each row:
+     *   ['label' => 'Privacy policy', 'entry' => '123', 'url' => '', 'newTab' => true]
+     *   Use `entry` (an entry id) for an on-site page, or `url` for anything else.
+     */
+    public array $links = [];
 
     /**
      * @var string Version of the published cookie/privacy policy. Bump to force re-consent.
@@ -148,7 +157,7 @@ class Settings extends Model
     {
         return [
             [['consentModeEnabled'], 'boolean'],
-            [['scripts'], 'safe'],
+            [['scripts', 'links'], 'safe'],
             [['pluginName', 'cookieName', 'policyVersion', 'consentVersion'], 'required'],
             [['cookieLifetimeDays'], 'integer', 'min' => 1],
             [['consentRetentionDays'], 'integer', 'min' => 0],
@@ -235,6 +244,70 @@ class Settings extends Model
     public function getScriptsForTable(): array
     {
         return $this->getScripts();
+    }
+
+    /**
+     * Resolve the banner links for output. Each link resolves to a final URL —
+     * an entry's URL (for the requested locale) takes precedence over a manual
+     * URL. Links with no destination are skipped.
+     *
+     * @return array<int, array{label:string,url:string,newTab:bool}>
+     */
+    public function getLinks(?string $locale = null): array
+    {
+        $site = $this->resolveSite($locale);
+        $out = [];
+
+        foreach ($this->links as $row) {
+            $label = trim((string)($row['label'] ?? ''));
+            $newTab = !empty($row['newTab']);
+
+            $url = '';
+            $entryId = (int)($row['entry'] ?? 0);
+
+            if ($entryId) {
+                $entry = Entry::find()->id($entryId)->siteId($site->id)->status(null)->one()
+                    ?? Entry::find()->id($entryId)->status(null)->one();
+                if ($entry) {
+                    $url = (string)$entry->getUrl();
+                }
+            }
+
+            if ($url === '') {
+                $url = trim((string)($row['url'] ?? ''));
+            }
+
+            if ($url === '') {
+                continue;
+            }
+
+            $out[] = [
+                'label' => $label !== '' ? Craft::t('site', $label) : $url,
+                'url' => $url,
+                'newTab' => $newTab,
+            ];
+        }
+
+        return $out;
+    }
+
+    private function resolveSite(?string $locale): \craft\models\Site
+    {
+        $sites = Craft::$app->getSites();
+
+        if ($locale) {
+            $site = $sites->getSiteByHandle($locale);
+            if ($site) {
+                return $site;
+            }
+            foreach ($sites->getAllSites() as $s) {
+                if ($s->language === $locale) {
+                    return $s;
+                }
+            }
+        }
+
+        return $sites->getCurrentSite();
     }
 
     /**
