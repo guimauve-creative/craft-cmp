@@ -88,7 +88,7 @@ class CookieConsent extends Plugin
 
     public function getPluginName(): string
     {
-        return Craft::t('cookie-consent', $this->getSettings()->pluginName ?: 'Craft CMP - Consent Management Platform');
+        return Craft::t('craft-cmp', $this->getSettings()->pluginName ?: 'Craft CMP - Consent Management Platform');
     }
 
     public function getSettingsResponse(): mixed
@@ -102,13 +102,13 @@ class CookieConsent extends Plugin
         $nav['label'] = $this->getPluginName();
 
         $nav['subnav']['records'] = [
-            'label' => Craft::t('cookie-consent', 'Records'),
+            'label' => Craft::t('craft-cmp', 'Records'),
             'url' => 'craft-cmp/records',
         ];
 
         if (Craft::$app->getUser()->getIsAdmin() && Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
             $nav['subnav']['settings'] = [
-                'label' => Craft::t('cookie-consent', 'Settings'),
+                'label' => Craft::t('craft-cmp', 'Settings'),
                 'url' => 'craft-cmp/settings',
             ];
         }
@@ -175,13 +175,13 @@ class CookieConsent extends Plugin
     {
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function(RegisterUserPermissionsEvent $event) {
             $event->permissions[] = [
-                'heading' => Craft::t('cookie-consent', 'Cookie Consent'),
+                'heading' => Craft::t('craft-cmp', 'Cookie Consent'),
                 'permissions' => [
                     'cookieConsent:viewRecords' => [
-                        'label' => Craft::t('cookie-consent', 'View consent records'),
+                        'label' => Craft::t('craft-cmp', 'View consent records'),
                     ],
                     'cookieConsent:exportRecords' => [
-                        'label' => Craft::t('cookie-consent', 'Export consent records'),
+                        'label' => Craft::t('craft-cmp', 'Export consent records'),
                     ],
                 ],
             ];
@@ -208,15 +208,15 @@ class CookieConsent extends Plugin
         });
 
         Event::on(Gql::class, Gql::EVENT_REGISTER_GQL_SCHEMA_COMPONENTS, function(RegisterGqlSchemaComponentsEvent $event) {
-            $label = Craft::t('cookie-consent', 'Cookie Consent');
+            $label = Craft::t('craft-cmp', 'Cookie Consent');
             $event->queries[$label]['cookieConsent.config:read'] = [
-                'label' => Craft::t('cookie-consent', 'Read cookie consent configuration'),
+                'label' => Craft::t('craft-cmp', 'Read cookie consent configuration'),
             ];
             $event->queries[$label]['cookieConsent.records:read'] = [
-                'label' => Craft::t('cookie-consent', 'Read cookie consent records'),
+                'label' => Craft::t('craft-cmp', 'Read cookie consent records'),
             ];
             $event->mutations[$label]['cookieConsent.records:save'] = [
-                'label' => Craft::t('cookie-consent', 'Save cookie consent records'),
+                'label' => Craft::t('craft-cmp', 'Save cookie consent records'),
             ];
         });
     }

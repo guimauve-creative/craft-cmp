@@ -40,12 +40,12 @@ class ConsentRecord extends Element
 
     public static function displayName(): string
     {
-        return Craft::t('cookie-consent', 'Consent Record');
+        return Craft::t('craft-cmp', 'Consent Record');
     }
 
     public static function pluralDisplayName(): string
     {
-        return Craft::t('cookie-consent', 'Consent Records');
+        return Craft::t('craft-cmp', 'Consent Records');
     }
 
     public static function refHandle(): ?string
@@ -93,7 +93,7 @@ class ConsentRecord extends Element
         $sources = [
             [
                 'key' => '*',
-                'label' => Craft::t('cookie-consent', 'All records'),
+                'label' => Craft::t('craft-cmp', 'All records'),
                 'criteria' => [],
                 'defaultSort' => ['dateCreated', 'desc'],
             ],
@@ -102,7 +102,7 @@ class ConsentRecord extends Element
         foreach (['accept_all', 'reject_all', 'custom', 'withdraw'] as $action) {
             $sources[] = [
                 'key' => "action:$action",
-                'label' => Craft::t('cookie-consent', ucfirst(str_replace('_', ' ', $action))),
+                'label' => Craft::t('craft-cmp', ucfirst(str_replace('_', ' ', $action))),
                 'criteria' => ['action' => $action],
             ];
         }
@@ -115,8 +115,8 @@ class ConsentRecord extends Element
         return [
             Craft::$app->getElements()->createAction([
                 'type' => Delete::class,
-                'confirmationMessage' => Craft::t('cookie-consent', 'Are you sure you want to delete the selected consent records?'),
-                'successMessage' => Craft::t('cookie-consent', 'Consent records deleted.'),
+                'confirmationMessage' => Craft::t('craft-cmp', 'Are you sure you want to delete the selected consent records?'),
+                'successMessage' => Craft::t('craft-cmp', 'Consent records deleted.'),
             ]),
             Restore::class,
         ];
@@ -132,15 +132,15 @@ class ConsentRecord extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'visitorId' => ['label' => Craft::t('cookie-consent', 'Visitor')],
-            'action' => ['label' => Craft::t('cookie-consent', 'Action')],
-            'categoriesSummary' => ['label' => Craft::t('cookie-consent', 'Categories')],
-            'policyVersion' => ['label' => Craft::t('cookie-consent', 'Policy version')],
-            'consentVersion' => ['label' => Craft::t('cookie-consent', 'Consent version')],
-            'locale' => ['label' => Craft::t('cookie-consent', 'Locale')],
-            'userId' => ['label' => Craft::t('cookie-consent', 'User')],
-            'ip' => ['label' => Craft::t('cookie-consent', 'IP')],
-            'dateCreated' => ['label' => Craft::t('cookie-consent', 'Date')],
+            'visitorId' => ['label' => Craft::t('craft-cmp', 'Visitor')],
+            'action' => ['label' => Craft::t('craft-cmp', 'Action')],
+            'categoriesSummary' => ['label' => Craft::t('craft-cmp', 'Categories')],
+            'policyVersion' => ['label' => Craft::t('craft-cmp', 'Policy version')],
+            'consentVersion' => ['label' => Craft::t('craft-cmp', 'Consent version')],
+            'locale' => ['label' => Craft::t('craft-cmp', 'Locale')],
+            'userId' => ['label' => Craft::t('craft-cmp', 'User')],
+            'ip' => ['label' => Craft::t('craft-cmp', 'IP')],
+            'dateCreated' => ['label' => Craft::t('craft-cmp', 'Date')],
         ];
     }
 
@@ -152,9 +152,9 @@ class ConsentRecord extends Element
     protected static function defineSortOptions(): array
     {
         return [
-            'dateCreated' => Craft::t('cookie-consent', 'Date'),
-            'action' => Craft::t('cookie-consent', 'Action'),
-            'policyVersion' => Craft::t('cookie-consent', 'Policy version'),
+            'dateCreated' => Craft::t('craft-cmp', 'Date'),
+            'action' => Craft::t('craft-cmp', 'Action'),
+            'policyVersion' => Craft::t('craft-cmp', 'Policy version'),
         ];
     }
 
@@ -214,7 +214,7 @@ class ConsentRecord extends Element
     public function getCategoriesSummary(): string
     {
         $granted = array_keys(array_filter($this->_categories));
-        return $granted ? implode(', ', $granted) : Craft::t('cookie-consent', 'none');
+        return $granted ? implode(', ', $granted) : Craft::t('craft-cmp', 'none');
     }
 
     protected function attributeHtml(string $attribute): string

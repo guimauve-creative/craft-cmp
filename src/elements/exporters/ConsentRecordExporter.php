@@ -14,7 +14,7 @@ class ConsentRecordExporter extends ElementExporter
 {
     public static function displayName(): string
     {
-        return \Craft::t('cookie-consent', 'Consent records');
+        return \Craft::t('craft-cmp', 'Consent records');
     }
 
     public function export(ElementQueryInterface $query): array
