@@ -16,7 +16,7 @@ class Settings extends Model
     /**
      * @var string The display name shown in the CP nav.
      */
-    public string $pluginName = 'Craft CMP - Consent Management Platform';
+    public string $pluginName = 'Cookie Consent';
 
     /**
      * @var array Cookie category definitions. Each row:

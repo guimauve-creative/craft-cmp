@@ -88,7 +88,7 @@ class CookieConsent extends Plugin
 
     public function getPluginName(): string
     {
-        return Craft::t('craft-cmp', $this->getSettings()->pluginName ?: 'Craft CMP - Consent Management Platform');
+        return Craft::t('craft-cmp', $this->getSettings()->pluginName ?: 'Cookie Consent');
     }
 
     public function getSettingsResponse(): mixed
