@@ -1,5 +1,15 @@
 # Release Notes for Craft CMP — Consent Management Platform
 
+## 0.2.0 - 2026-06-19
+
+### Changed
+- Renamed the plugin handle from `cookie-consent` to `craft-cmp` so it no longer
+  collides with an existing Plugin Store listing. Control Panel URLs, the config
+  override file (`config/craft-cmp.php`) and the console command
+  (`php craft craft-cmp/records/gc`) now use the new handle. The public REST API
+  URLs (`/cookie-consent/*`) and the `craft.cookieConsent` Twig variable are
+  unchanged.
+
 ## 0.1.0 - 2026-06-19
 
 ### Added

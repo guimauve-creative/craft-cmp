@@ -9,7 +9,7 @@ use yii\console\ExitCode;
 /**
  * Maintenance commands for consent records.
  *
- *   php craft cookie-consent/records/gc
+ *   php craft craft-cmp/records/gc
  */
 class RecordsController extends Controller
 {

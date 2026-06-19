@@ -5,7 +5,7 @@
 {% set fullPageForm = true %}
 
 {% set crumbs = [
-    { label: plugin.getPluginName(), url: url('cookie-consent') },
+    { label: plugin.getPluginName(), url: url('craft-cmp') },
 ] %}
 
 {% set signalPlaceholder = signalOptions|keys|join(', ') %}
@@ -18,8 +18,8 @@
 
 {% block content %}
     <input type="hidden" name="action" value="plugins/save-plugin-settings">
-    <input type="hidden" name="pluginHandle" value="cookie-consent">
-    {{ redirectInput('cookie-consent/settings') }}
+    <input type="hidden" name="pluginHandle" value="craft-cmp">
+    {{ redirectInput('craft-cmp/settings') }}
 
     {{ forms.textField({
         first: true,

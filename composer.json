@@ -45,7 +45,7 @@
     },
     "extra": {
         "name": "Craft CMP - Consent Management Platform",
-        "handle": "cookie-consent",
+        "handle": "craft-cmp",
         "class": "guimauve\\cookieconsent\\CookieConsent",
         "developer": "Guimauve",
         "developerUrl": "https://guimauvecreative.com",

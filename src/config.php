@@ -3,7 +3,7 @@
 /**
  * Cookie Consent config.php
  *
- * Copy this file to your Craft project's config/ folder as `cookie-consent.php`
+ * Copy this file to your Craft project's config/ folder as `craft-cmp.php`
  * to override plugin settings per-environment. Any values set here take
  * precedence over the settings stored in Project Config and are read-only in
  * the Control Panel. Supports Craft's multi-environment config format.

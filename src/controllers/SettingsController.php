@@ -19,7 +19,7 @@ class SettingsController extends Controller
         /** @var CookieConsent $plugin */
         $plugin = CookieConsent::$plugin;
 
-        return $this->renderTemplate('cookie-consent/settings', [
+        return $this->renderTemplate('craft-cmp/settings', [
             'plugin' => $plugin,
             'settings' => $plugin->getSettings(),
             'signalOptions' => Settings::consentModeSignals(),

@@ -36,10 +36,10 @@ Twig integration. Either way, the plugin owns the data, config and consent recor
 
 ```bash
 composer require guimauve/craft-cmp
-php craft plugin/install cookie-consent
+php craft plugin/install craft-cmp
 ```
 
-Then open **Settings → Cookie Consent** and define your categories.
+Then open **Craft CMP → Settings** in the Control Panel and define your categories.
 
 ## Control Panel setup
 
@@ -322,7 +322,7 @@ One paid license, every feature unlocked — no tiers:
 Set **Record retention (days)** in settings, then run on a schedule (cron):
 
 ```bash
-php craft cookie-consent/records/gc
+php craft craft-cmp/records/gc
 ```
 
 ## Future / next on the plate

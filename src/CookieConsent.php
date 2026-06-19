@@ -93,7 +93,7 @@ class CookieConsent extends Plugin
 
     public function getSettingsResponse(): mixed
     {
-        return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('cookie-consent/settings'));
+        return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('craft-cmp/settings'));
     }
 
     public function getCpNavItem(): ?array
@@ -103,13 +103,13 @@ class CookieConsent extends Plugin
 
         $nav['subnav']['records'] = [
             'label' => Craft::t('cookie-consent', 'Records'),
-            'url' => 'cookie-consent/records',
+            'url' => 'craft-cmp/records',
         ];
 
         if (Craft::$app->getUser()->getIsAdmin() && Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
             $nav['subnav']['settings'] = [
                 'label' => Craft::t('cookie-consent', 'Settings'),
-                'url' => 'cookie-consent/settings',
+                'url' => 'craft-cmp/settings',
             ];
         }
 
@@ -144,28 +144,30 @@ class CookieConsent extends Plugin
     private function _registerTemplateRoots(): void
     {
         // Front-end template root so craft.cookieConsent.banner() can render
-        // `cookie-consent/banner` (and buyers can supply their own path).
+        // `craft-cmp/banner` (and buyers can supply their own path).
         Event::on(View::class, View::EVENT_REGISTER_SITE_TEMPLATE_ROOTS, function(RegisterTemplateRootsEvent $event) {
-            $event->roots['cookie-consent'] = $this->getBasePath() . DIRECTORY_SEPARATOR . 'templates';
+            $event->roots['craft-cmp'] = $this->getBasePath() . DIRECTORY_SEPARATOR . 'templates';
         });
     }
 
     private function _registerSiteRoutes(): void
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES, function(RegisterUrlRulesEvent $event) {
-            $event->rules['POST cookie-consent/save'] = 'cookie-consent/consent/save';
-            $event->rules['OPTIONS cookie-consent/save'] = 'cookie-consent/consent/save';
-            $event->rules['GET cookie-consent/status'] = 'cookie-consent/consent/status';
-            $event->rules['GET cookie-consent/config'] = 'cookie-consent/consent/config';
+            // Public URLs stay `/cookie-consent/*` (frontend contract); the route
+            // targets use the plugin handle `craft-cmp`.
+            $event->rules['POST cookie-consent/save'] = 'craft-cmp/consent/save';
+            $event->rules['OPTIONS cookie-consent/save'] = 'craft-cmp/consent/save';
+            $event->rules['GET cookie-consent/status'] = 'craft-cmp/consent/status';
+            $event->rules['GET cookie-consent/config'] = 'craft-cmp/consent/config';
         });
     }
 
     private function _registerCpRoutes(): void
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
-            $event->rules['cookie-consent'] = 'cookie-consent/records/index';
-            $event->rules['cookie-consent/records'] = 'cookie-consent/records/index';
-            $event->rules['cookie-consent/settings'] = 'cookie-consent/settings/edit';
+            $event->rules['craft-cmp'] = 'craft-cmp/records/index';
+            $event->rules['craft-cmp/records'] = 'craft-cmp/records/index';
+            $event->rules['craft-cmp/settings'] = 'craft-cmp/settings/edit';
         });
     }
 

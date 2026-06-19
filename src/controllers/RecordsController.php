@@ -16,7 +16,7 @@ class RecordsController extends Controller
     {
         $this->requirePermission('cookieConsent:viewRecords');
 
-        return $this->renderTemplate('cookie-consent/records/index', [
+        return $this->renderTemplate('craft-cmp/records/index', [
             'title' => Craft::t('cookie-consent', 'Consent Records'),
             'elementType' => ConsentRecord::class,
             'elementDisplayName' => ConsentRecord::displayName(),

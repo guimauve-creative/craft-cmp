@@ -175,7 +175,7 @@ JS;
         ], $variables);
 
         $mode = View::TEMPLATE_MODE_SITE;
-        $template = $template ?: 'cookie-consent/banner';
+        $template = $template ?: 'craft-cmp/banner';
 
         $html = Craft::$app->getView()->renderTemplate($template, $vars, $mode);
 
