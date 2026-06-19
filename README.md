@@ -662,3 +662,8 @@ Have a request? Open an issue on the repository.
 
 Open an issue at https://github.com/guimauve-creative/craft-cmp/issues or email
 info@guimauvecreative.com.
+
+## Credits
+
+- Cookie icon by [Gregor Cresnar](https://thenounproject.com/creator/grega.cresnar)
+  via the Noun Project (licensed).
