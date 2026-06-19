@@ -9,7 +9,6 @@
 ] %}
 
 {% set signalPlaceholder = signalOptions|keys|join(', ') %}
-{% set entryOptions = entryOptions ?? [] %}
 
 {# Category options for the scripts table's category column #}
 {% set categoryOptions = [] %}
@@ -66,16 +65,15 @@
 
     <hr>
     <h2>{{ "Banner links"|t('cookie-consent') }}</h2>
-    <p class="light">{{ "Small links shown at the bottom of the banner (e.g. Privacy policy, Cookie policy). Pick an on-site entry, or enter a URL. If both are set, the entry wins."|t('cookie-consent') }}</p>
+    <p class="light">{{ "Small links shown at the bottom of the banner (e.g. Privacy policy, Cookie policy)."|t('cookie-consent') }}</p>
 
     {{ forms.editableTableField({
         label: "Links"|t('cookie-consent'),
         id: 'links',
         name: 'settings[links]',
         cols: {
-            label: { heading: "Label"|t('cookie-consent'), type: 'singleline', width: '25%' },
-            entry: { heading: "Entry"|t('cookie-consent'), type: 'select', options: entryOptions, width: '30%' },
-            url: { heading: "URL"|t('cookie-consent'), type: 'singleline', width: '30%', placeholder: 'https://…' },
+            label: { heading: "Label"|t('cookie-consent'), type: 'singleline', width: '35%' },
+            url: { heading: "URL"|t('cookie-consent'), type: 'singleline', width: '50%', placeholder: 'https://…' },
             newTab: { heading: "New tab"|t('cookie-consent'), type: 'lightswitch', width: '15%' },
         },
         rows: settings.links,

@@ -50,8 +50,7 @@ Then open **Settings → Cookie Consent** and define your categories.
 2. **Banner copy** — title, body (HTML allowed) and button labels. These are
    translatable via Craft's static translations / `site` category.
 3. **Banner links** — small links shown at the bottom of the banner (e.g.
-   Privacy policy). Each link has a label and points to an **entry** (resolved to
-   its URL for the requested locale) or a manual **URL**, with an optional
+   Privacy policy). Each link has a label, a URL, and an optional
    open-in-new-tab toggle.
 4. **Policy version** — bump this string whenever your cookie policy changes;
    every visitor will be re-prompted automatically.
@@ -98,8 +97,7 @@ Returns the banner config and category/signal mapping.
 }
 ```
 
-`links` are resolved server-side (an entry's URL for the requested locale, or a
-manual URL) and are meant to render as small links at the bottom of the banner.
+`links` are meant to render as small links at the bottom of the banner.
 
 ### `POST /cookie-consent/save`
 
