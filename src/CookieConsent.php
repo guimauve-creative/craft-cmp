@@ -100,6 +100,7 @@ class CookieConsent extends Plugin
     {
         $nav = parent::getCpNavItem();
         $nav['label'] = $this->getPluginName();
+        $nav['icon'] = $this->getBasePath() . DIRECTORY_SEPARATOR . 'icon.svg';
 
         $nav['subnav']['records'] = [
             'label' => Craft::t('craft-cmp', 'Records'),
