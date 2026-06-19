@@ -14,4 +14,4 @@
 - Banner links repeater: add labelled links (label + URL + open-in-new-tab toggle). Rendered as small links at the bottom of the banner (Twig + Vue/React snippets) and exposed via REST/GraphQL config.
 - CP settings: cookie categories with Google Consent Mode v2 signal mapping, banner copy, policy/consent versions, cookie name/lifetime, record retention, CORS allow-list and optional shared secret.
 - `cookie-consent/records/gc` console command for retention-based garbage collection.
-- Lite and Pro editions.
+- Single paid edition — every feature included.

@@ -229,9 +229,9 @@ GA4 measurement ID is set, loads `gtag.js`:
 {{ craft.cookieConsent.gtagDefaults() }}
 ```
 
-**2. Render the banner** anywhere in your layout (Pro edition). It ships with a
-small bundled script that writes the cookie, updates `gtag`, and POSTs the audit
-record to `/cookie-consent/save`:
+**2. Render the banner** anywhere in your layout. It ships with a small bundled
+script that writes the cookie, updates `gtag`, and POSTs the audit record to
+`/cookie-consent/save`:
 
 ```twig
 {{ craft.cookieConsent.banner() }}
@@ -619,21 +619,18 @@ changes required to support a new frontend.
 
 ---
 
-## Editions
+## What's included
 
-| Feature | Lite | Pro |
-|---|---|---|
-| Banner config + REST `save`/`config` | ✔ | ✔ |
-| GraphQL config + status queries | ✔ | ✔ |
-| Twig variable (`config`, `has`, `status`, `gtagDefaults`) | ✔ | ✔ |
-| Google Consent Mode v2 signals | ✔ | ✔ |
-| Per-category tags/scripts (any provider) | ✔ | ✔ |
-| Rendered Twig banner (`craft.cookieConsent.banner()`) | | ✔ |
-| CP consent records index | | ✔ |
-| CSV / JSON export | | ✔ |
-| Retention garbage collection | | ✔ |
-| GraphQL `saveCookieConsent` mutation | | ✔ |
-| Per-user permissions | | ✔ |
+One paid license, every feature unlocked — no tiers:
+
+- Headless REST API (`save` / `status` / `config`)
+- GraphQL config + status queries and the `saveCookieConsent` mutation
+- Twig integration (`craft.cookieConsent` variable + rendered `banner()`)
+- Google Consent Mode v2 signal mapping
+- Per-category tags/scripts for any provider (Meta, Matomo, Hotjar, …)
+- CP consent records index with CSV / JSON export
+- Retention garbage collection
+- Per-user permissions
 
 ## Retention / garbage collection
 

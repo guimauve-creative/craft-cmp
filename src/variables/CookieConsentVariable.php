@@ -150,25 +150,20 @@ JS;
         }
 
         // Ensure gated provider scripts run for returning visitors even when the
-        // banner isn't shown (works on Lite too).
+        // banner isn't shown.
         $this->registerRuntime();
 
         return new Markup($out, 'UTF-8');
     }
 
     /**
-     * Render the cookie banner (Pro edition). Registers the interaction JS asset
-     * and injects the config the script needs.
+     * Render the cookie banner. Registers the interaction JS asset and injects
+     * the config the script needs.
      *
      * @param string|null $template Optional project template path to render instead of the default.
      */
     public function banner(?string $template = null, array $variables = []): Markup
     {
-        if (!CookieConsent::$plugin->is(CookieConsent::EDITION_PRO)) {
-            Craft::warning('craft.cookieConsent.banner() requires the Pro edition.', __METHOD__);
-            return new Markup('', 'UTF-8');
-        }
-
         $this->registerRuntime($variables['saveUrl'] ?? null);
 
         $config = $this->config();

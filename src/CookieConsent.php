@@ -48,20 +48,6 @@ class CookieConsent extends Plugin
 
     public static CookieConsent $plugin;
 
-    // Editions
-    // =========================================================================
-
-    public const EDITION_LITE = 'lite';
-    public const EDITION_PRO = 'pro';
-
-    public static function editions(): array
-    {
-        return [
-            self::EDITION_LITE,
-            self::EDITION_PRO,
-        ];
-    }
-
     // Properties
     // =========================================================================
 
