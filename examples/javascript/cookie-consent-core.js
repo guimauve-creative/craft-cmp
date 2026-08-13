@@ -56,6 +56,7 @@ export class CookieConsentManager {
      * @param {function} [opts.fetchImpl] Custom fetch (defaults to global fetch).
      * @param {string} [opts.sharedSecret] Optional X-Consent-Secret header value.
      * @param {boolean} [opts.injectScripts] Set false to let the host app own DOM injection.
+     * @param {boolean} [opts.loadGtagScript=true] Inject gtag.js (set false if a host module loads it).
      */
     constructor(opts = {}) {
         const base = (opts.apiBase || '').replace(/\/$/, '');
@@ -72,6 +73,8 @@ export class CookieConsentManager {
         // Set false to skip injecting provider scripts on this frontend (e.g. if
         // the host app prefers to own DOM injection). Consent state still syncs.
         this.injectScripts = opts.injectScripts !== false;
+        // When false, skip injecting gtag.js (e.g. a Nuxt module owns the tag).
+        this.loadGtagScript = opts.loadGtagScript !== false;
         this._injected = new Set();
         this.decision = this._readCookie();
     }
@@ -161,15 +164,19 @@ export class CookieConsentManager {
                 window.gtag = function () { window.dataLayer.push(arguments); };
             }
 
-            window.gtag('consent', 'default', { ...DEFAULT_DENIED, wait_for_update: 500 });
-            window.gtag('set', 'url_passthrough', true);
-            window.gtag('set', 'ads_data_redaction', true);
+            // When a host module (nuxt-gtag) already queued consent defaults via
+            // initCommands, do not push another default after gtag('config').
+            if (this.loadGtagScript) {
+                window.gtag('consent', 'default', { ...DEFAULT_DENIED, wait_for_update: 500 });
+                window.gtag('set', 'url_passthrough', true);
+                window.gtag('set', 'ads_data_redaction', true);
+            }
         }
 
         // Re-apply a prior decision immediately (no flicker on revisit).
         this.applyStored();
 
-        if (this.config?.consentMode !== false && gtagId) {
+        if (this.loadGtagScript && this.config?.consentMode !== false && gtagId) {
             const s = document.createElement('script');
             s.async = true;
             s.src = `https://www.googletagmanager.com/gtag/js?id=${gtagId}`;
